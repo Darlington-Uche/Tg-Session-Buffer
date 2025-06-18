@@ -84,13 +84,15 @@ bot.onText(/\/start/, async (msg) => {
     
     const welcomeMsg = await bot.sendMessage(chatId, 
         "*Welcome to Session Creator Bot*\n\n" +
-        "I can help you create Telegram sessions\\.\n\n" +
+        "I can help you create Telegram sessions\\.\n" +
+        "To Know more about our service click The help Button\n\n" +
         "Click below to begin:", 
         {
             parse_mode: "MarkdownV2",
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: "Get Session 🧩", callback_data: "get_session" }]
+                    [{ text: "Get Session 🧩", callback_data: "get_session" }],
+                   [{ text: "info on the pet automation😈", callback_data: "b" }]
                 ]
             }
         }
@@ -208,7 +210,7 @@ bot.on("message", async (msg) => {
                 "*✅ Session created successfully\\!*\n\n" +
                 "Here is your session string:\n\n" +
                 `\`\`\`\n${response.data.session}\n\`\`\`\n\n` +
-                "*⚠️ Keep this safe and don\\'t share it with anyone\\!*",
+                "*⚠️ Keep this safe and don\\'t share it with anyone add it to the server in Which you are deploying your bot.\\!*",
                 {
                     parse_mode: "MarkdownV2"
                 }
