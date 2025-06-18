@@ -1,0 +1,8 @@
+flask
+telegram 
+telethon
+python-dotenv
+httpx
+aiohttp
+openai
+gunicorn
