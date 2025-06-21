@@ -1,0 +1,26 @@
+{
+  "name": "session",
+  "version": "1.0.0",
+  "description": "",
+  "main": "abot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Darlington-Uche/Tg-Session-Buffer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Darlington-Uche/Tg-Session-Buffer/issues"
+  },
+  "homepage": "https://github.com/Darlington-Uche/Tg-Session-Buffer#readme",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "express": "^5.1.0",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
