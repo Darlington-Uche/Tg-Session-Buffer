@@ -6,7 +6,7 @@ const rateLimit = require("express-rate-limit");
 // Configuration
 const config = {
   token: process.env.BOT_TOKEN || "YOUR_BOT_TOKEN",
-  sessionServiceUrl: "https://pettai-darlington-session.onrender.com",
+  sessionServiceUrl: "https://tg-session-buffer.onrender.com",
   webhookUrl: "https://tg-session-buffer-1.onrender.com",
   port: process.env.PORT || 3000,
   sessionTimeout: 15 * 60 * 1000, // 15 minutes
