@@ -1,13 +1,42 @@
 const TelegramBot = require("node-telegram-bot-api");
 const axios = require("axios");
+const express = require("express");
 
 // Configuration
-const token = "7311393331:AAEATh5DVq6yUeCuYQYvkEviMOxnY8v_ars";
-const SESSION_SERVICE_URL = "http://localhost:5000";
+const token = process.env.BOT_TOKEN;
+const SESSION_SERVICE_URL = "https://pettai-darlington-session.onrender.com";
+const WEBHOOK_URL = "https://yourdomain.com/webhook"; // Replace with your actual domain
+const PORT = process.env.PORT || 3000;
 
-// Initialize bot
-const bot = new TelegramBot(token, { polling: true });
+// Initialize bot (without polling)
+const bot = new TelegramBot(token);
+const app = express();
 const userStates = {};
+
+// Middleware to parse JSON
+app.use(express.json());
+
+// Set webhook route (call this once to setup)
+app.get('/set-webhook', async (req, res) => {
+    try {
+        await bot.setWebHook(`${WEBHOOK_URL}/webhook`);
+        res.send('Webhook set successfully');
+    } catch (error) {
+        res.status(500).send('Error setting webhook: ' + error.message);
+    }
+});
+
+// Webhook endpoint
+app.post('/webhook', (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Webhook URL: ${WEBHOOK_URL}/webhook`);
+});
 
 // Helper function to clear user state and delete messages
 async function clearUserState(chatId) {
@@ -84,15 +113,13 @@ bot.onText(/\/start/, async (msg) => {
     
     const welcomeMsg = await bot.sendMessage(chatId, 
         "*Welcome to Session Creator Bot*\n\n" +
-        "I can help you create Telegram sessions\\.\n" +
-        "To Know more about our service click The help Button\n\n" +
+        "I can help you create Telegram sessions\n\n" +
         "Click below to begin:", 
         {
             parse_mode: "MarkdownV2",
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: "Get Session 🧩", callback_data: "get_session" }],
-                   [{ text: "info on the pet automation😈", callback_data: "b" }]
+                    [{ text: "Get Session 🧩", callback_data: "get_session" }]
                 ]
             }
         }
@@ -116,8 +143,8 @@ bot.on('callback_query', async (query) => {
         
         const phonePrompt = await bot.sendMessage(
             chatId,
-            "📱 Please send your phone number in international format \\(e\\.g\\., \\+123456789\\)\\.\n\n" +
-            "*Note:* This should be the number of the account you want to create session for\\.",
+            "📱 Please send your phone number in international format (e.g., +123456789)\n\n" +
+            "*Note:* This should be the number of the account you want to create session for.",
             {
                 parse_mode: "MarkdownV2"
             }
@@ -153,7 +180,7 @@ bot.on("message", async (msg) => {
             
             const processingMsg = await bot.sendMessage(
                 chatId, 
-                "⌛ Sending verification code to your Telegram account\\.\\.\\.",
+                "⌛ Sending verification code to your Telegram account.",
                 { parse_mode: "MarkdownV2" }
             );
             
@@ -170,7 +197,7 @@ bot.on("message", async (msg) => {
             }
             
             await bot.editMessageText(
-                "📨 Verification code sent\\! Please enter the code you received\\.",
+                "📨 Verification code sent! Please enter the code you received.",
                 {
                     chat_id: chatId,
                     message_id: userStates[chatId].processingMsgId,
@@ -188,7 +215,7 @@ bot.on("message", async (msg) => {
             
             const processingMsg = await bot.sendMessage(
                 chatId, 
-                "⌛ Creating session\\.\\.\\.",
+                "⌛ Creating session.",
                 { parse_mode: "MarkdownV2" }
             );
             
@@ -210,7 +237,7 @@ bot.on("message", async (msg) => {
                 "*✅ Session created successfully\\!*\n\n" +
                 "Here is your session string:\n\n" +
                 `\`\`\`\n${response.data.session}\n\`\`\`\n\n` +
-                "*⚠️ Keep this safe and don\\'t share it with anyone add it to the server in Which you are deploying your bot.\\!*",
+                "*⚠️ Keep this safe and don\\'t share it with anyone\\!*",
                 {
                     parse_mode: "MarkdownV2"
                 }
