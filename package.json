@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Darlington-Uche/Tg-Session-Buffer#readme",
   "dependencies": {
+  "express-rate-limit": "^6.7.0",
     "axios": "^1.10.0",
     "express": "^5.1.0",
     "node-telegram-bot-api": "^0.66.0"
