@@ -5,7 +5,7 @@ const express = require("express");
 // Configuration
 const token = process.env.BOT_TOKEN;
 const SESSION_SERVICE_URL = "https://pettai-darlington-session.onrender.com";
-const WEBHOOK_URL = "https://yourdomain.com/webhook"; // Replace with your actual domain
+const WEBHOOK_URL = "https://tg-session-buffer-1.onrender.com"; // Replace with your actual domain
 const PORT = process.env.PORT || 3000;
 
 // Initialize bot (without polling)
