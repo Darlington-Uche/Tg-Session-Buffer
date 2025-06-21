@@ -191,19 +191,26 @@ bot.on("message", async (msg) => {
 
       await bot.sendMessage(chatId, "⌛ Creating session...");
 
+      console.log(`Attempting to create session for ${state.phone}`); // Debug log
+      
       const response = await axios.post(
         `${config.sessionServiceUrl}/create_session`,
         {
           phone: state.phone,
           code: text,
         }
-      );
+      ).catch(err => {
+        console.error("Session creation API error:", err.response?.data || err.message);
+        throw err;
+      });
 
       if (!response.data.success) {
+        console.error("Session creation failed:", response.data.error);
         throw new Error(response.data.error || "Session creation failed");
       }
 
-      // Only use Markdown for the session display
+      console.log("Session created successfully"); // Debug log
+      
       await bot.sendMessage(
         chatId,
         "✅ Session created successfully!\n\n" +
@@ -216,6 +223,7 @@ bot.on("message", async (msg) => {
       userStates.clearState(chatId);
     }
   } catch (error) {
+    console.error("Full error:", error); // Detailed error logging
     await handleApiError(chatId, error);
     userStates.clearState(chatId);
   }
