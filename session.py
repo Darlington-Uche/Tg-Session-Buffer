@@ -45,8 +45,7 @@ class UserStateManager {
       this.clearState(chatId);
       bot.sendMessage(
         chatId,
-        "⌛ Session timed out. Use /start to begin again.",
-        { parse_mode: "MarkdownV2" }
+        "⌛ Session timed out. Use /start to begin again."
       );
     }, config.sessionTimeout);
     this.states.set(chatId, { ...state, timeout });
@@ -94,8 +93,7 @@ async function handleApiError(chatId, error) {
 
   await bot.sendMessage(
     chatId,
-    `*❌ Error:* ${escapeMarkdownV2(message)}\n\nUse /start to try again.`,
-    { parse_mode: "MarkdownV2" }
+    `❌ Error: ${message}\n\nUse /start to try again.`
   );
 }
 
@@ -106,10 +104,9 @@ bot.onText(/\/start/, async (msg) => {
 
   await bot.sendMessage(
     chatId,
-    `*Welcome to Session Creator Bot*\n\n` +
-      `I can help you create Telegram sessions\\.\n\nClick below to begin:`,
+    "Welcome to Session Creator Bot\n\n" +
+    "I can help you create Telegram sessions.\n\nClick below to begin:",
     {
-      parse_mode: "MarkdownV2",
       reply_markup: {
         inline_keyboard: [
           [{ text: "Get Session 🧩", callback_data: "get_session" }],
@@ -123,13 +120,12 @@ bot.onText(/\/help/, async (msg) => {
   const chatId = msg.chat.id;
   await bot.sendMessage(
     chatId,
-    `*Help Guide*\n\n` +
-      `1\\. Use /start to begin\n` +
-      `2\\. Click "Get Session" button\n` +
-      `3\\. Enter your phone number in international format \\+\\(e\\.g\\., \\+123456789\\)\n` +
-      `4\\. Enter the verification code you receive\n\n` +
-      `*Note:* This bot does not store any personal information\\!`,
-    { parse_mode: "MarkdownV2" }
+    "Help Guide\n\n" +
+    "1. Use /start to begin\n" +
+    "2. Click \"Get Session\" button\n" +
+    "3. Enter your phone number in international format (e.g., +123456789)\n" +
+    "4. Enter the verification code you receive\n\n" +
+    "Note: This bot does not store any personal information!"
   );
 });
 
@@ -143,8 +139,7 @@ bot.on("callback_query", async (query) => {
       userStates.setState(chatId, { step: "awaiting_phone" });
       await bot.sendMessage(
         chatId,
-        "📱 *Send your phone number* in international format \\(e\\.g\\., \\+123456789\\)",
-        { parse_mode: "MarkdownV2" }
+        "📱 Send your phone number in international format (e.g., +123456789)"
       );
     }
   } catch (error) {
@@ -170,9 +165,7 @@ bot.on("message", async (msg) => {
         );
       }
 
-      await bot.sendMessage(chatId, "⌛ Sending verification code...", {
-        parse_mode: "MarkdownV2",
-      });
+      await bot.sendMessage(chatId, "⌛ Sending verification code...");
 
       const response = await axios.post(`${config.sessionServiceUrl}/send_code`, {
         phone: text,
@@ -189,17 +182,14 @@ bot.on("message", async (msg) => {
 
       await bot.sendMessage(
         chatId,
-        "📨 Verification code sent! Please enter the code you received.",
-        { parse_mode: "MarkdownV2" }
+        "📨 Verification code sent! Please enter the code you received."
       );
     } else if (state.step === "awaiting_code") {
       if (!/^\d{5,6}$/.test(text)) {
         throw new Error("Invalid code format. Please enter 5 or 6 digits.");
       }
 
-      await bot.sendMessage(chatId, "⌛ Creating session...", {
-        parse_mode: "MarkdownV2",
-      });
+      await bot.sendMessage(chatId, "⌛ Creating session...");
 
       const response = await axios.post(
         `${config.sessionServiceUrl}/create_session`,
@@ -213,12 +203,13 @@ bot.on("message", async (msg) => {
         throw new Error(response.data.error || "Session creation failed");
       }
 
+      // Only use Markdown for the session display
       await bot.sendMessage(
         chatId,
-        "*✅ Session created successfully\\!*\n\n" +
-          "*Session string:*\n" +
-          `\`\`\`${response.data.session}\`\`\`\n\n` +
-          "*⚠️ Warning:* Do \\*not\\* share this with anyone\\!",
+        "✅ Session created successfully!\n\n" +
+        "Session string:\n" +
+        `\`\`\`${response.data.session}\`\`\`\n\n` +
+        "⚠️ Warning: Do not share this with anyone!",
         { parse_mode: "MarkdownV2" }
       );
 
