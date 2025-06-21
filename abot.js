@@ -211,15 +211,16 @@ bot.on("message", async (msg) => {
 
       console.log("Session created successfully"); // Debug log
       
-      await bot.sendMessage(
-        chatId,
-        "✅ Session created successfully!\n\n" +
-        "Session string:\n" +
-        `\`\`\`${response.data.session}\`\`\`\n\n` +
-        "⚠️ Warning: Do not share this with anyone!",
-        { parse_mode: "MarkdownV2" }
-      );
-
+      
+// To t
+await bot.sendMessage(
+  chatId,
+  `✅ Session created successfully\\!\n\n` +
+  `Session string:\n` +
+  `\`\`\`${escapeMarkdownV2(response.data.session)}\`\`\`\n\n` +
+  `⚠️ Warning: Do not share this with anyone\\!`,
+  { parse_mode: "MarkdownV2" }
+);
       userStates.clearState(chatId);
     }
   } catch (error) {
