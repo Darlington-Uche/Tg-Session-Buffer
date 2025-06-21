@@ -167,7 +167,7 @@ bot.on("message", async (msg) => {
 
       await bot.sendMessage(chatId, "⌛ Sending verification code...");
 
-      const response = await axios.post(`${config.sessionServiceUrl}/send_code`, {
+      const response = await axios.post(`${sessionServiceUrl}/send_code`, {
         phone: text,
       });
 
@@ -192,7 +192,7 @@ bot.on("message", async (msg) => {
       await bot.sendMessage(chatId, "⌛ Creating session...");
 
       const response = await axios.post(
-        `${config.sessionServiceUrl}/create_session`,
+        `${sessionServiceUrl}/create_session`,
         {
           phone: state.phone,
           code: text,
