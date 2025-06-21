@@ -2,36 +2,41 @@ const TelegramBot = require("node-telegram-bot-api");
 const axios = require("axios");
 const express = require("express");
 
-// Config
+// Configuration
 const token = process.env.BOT_TOKEN;
-const SESSION_SERVICE_URL = "https://tg-session-buffer-1.onrender.com";
+const SESSION_SERVICE_URL = "https://pettai-darlington-session.onrender.com";
+const WEBHOOK_URL = "https://tg-session-buffer-1.onrender.com"; // Replace with your actual domain
 const PORT = process.env.PORT || 3000;
 
+// Initialize bot (without polling)
 const bot = new TelegramBot(token);
 const app = express();
 const userStates = {};
 
+// Middleware to parse JSON
 app.use(express.json());
 
-// Webhook setup
+// Set webhook route (call this once to setup)
 app.get('/set-webhook', async (req, res) => {
     try {
-        await bot.setWebHook(`https://tg-session-buffer-1.onrender.com/webhook`);
-        res.send('Webhook set');
-    } catch (err) {
-        res.status(500).send('Error: ' + err.message);
+        await bot.setWebHook(`${WEBHOOK_URL}/webhook`);
+        res.send('Webhook set successfully');
+    } catch (error) {
+        res.status(500).send('Error setting webhook: ' + error.message);
     }
 });
 
+// Webhook endpoint
 app.post('/webhook', (req, res) => {
     bot.processUpdate(req.body);
     res.sendStatus(200);
 });
 
+// Start server
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(`Webhook URL: ${WEBHOOK_URL}/webhook`);
 });
-
 // Utility: Clear state
 async function clearUserState(chatId) {
     if (userStates[chatId]?.timeout) {
