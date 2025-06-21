@@ -47,34 +47,22 @@ async function clearUserState(chatId) {
 function setActionTimeout(chatId) {
     userStates[chatId].timeout = setTimeout(async () => {
         try {
-            const msg = await bot.sendMessage(
+            await bot.sendMessage(
                 chatId, 
                 "⌛ Session timed out. Use /start to begin again.", 
                 { parse_mode: "MarkdownV2" }
             );
-            setTimeout(() => bot.deleteMessage(chatId, msg.message_id).catch(() => {}), 2 * 60 * 1000);
         } catch (_) {}
         await clearUserState(chatId);
     }, 15 * 60 * 1000);
-}
-
-async function deleteAfter(chatId, msgId, delay = 2 * 60 * 1000) {
-    setTimeout(async () => {
-        try {
-            await bot.deleteMessage(chatId, msgId);
-        } catch (error) {
-            console.error('Error deleting message:', error.message);
-        }
-    }, delay);
 }
 
 // Bot commands
 bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
     await clearUserState(chatId);
-    await bot.deleteMessage(chatId, msg.message_id).catch(() => {});
 
-    const welcome = await bot.sendMessage(
+    await bot.sendMessage(
         chatId,
         `*Welcome to Session Creator Bot*\\n\\n` +
         `I can help you create Telegram sessions\\.\\n\\nClick below to begin:`,
@@ -85,28 +73,25 @@ bot.onText(/\/start/, async (msg) => {
             }
         }
     );
-    deleteAfter(chatId, welcome.message_id);
 });
 
 // Callback queries
 bot.on("callback_query", async (query) => {
     const chatId = query.message.chat.id;
     const data = query.data;
-    
+
     try {
-        await bot.deleteMessage(chatId, query.message.message_id).catch(() => {});
         await clearUserState(chatId);
 
         if (data === "get_session") {
             userStates[chatId] = { step: "awaiting_phone" };
             setActionTimeout(chatId);
 
-            const prompt = await bot.sendMessage(
+            await bot.sendMessage(
                 chatId,
                 "📱 *Send your phone number* in international format \\\\(e\\.g\\., \\+123456789\\\\)",
                 { parse_mode: "MarkdownV2" }
             );
-            deleteAfter(chatId, prompt.message_id);
         }
     } catch (error) {
         console.error('Callback query error:', error);
@@ -117,11 +102,10 @@ bot.on("callback_query", async (query) => {
 bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
     const text = msg.text;
-    
+
     if (!userStates[chatId] || !text) return;
 
     try {
-        await bot.deleteMessage(chatId, msg.message_id).catch(() => {});
         const state = userStates[chatId];
 
         if (state.step === "awaiting_phone") {
@@ -133,12 +117,11 @@ bot.on("message", async (msg) => {
             state.phone = text;
             state.step = "awaiting_code";
 
-            const processing = await bot.sendMessage(
+            await bot.sendMessage(
                 chatId, 
                 "⌛ Sending verification code...", 
                 { parse_mode: "MarkdownV2" }
             );
-            deleteAfter(chatId, processing.message_id);
 
             // Call session service
             const response = await axios.post(`${SESSION_SERVICE_URL}/send_code`, { 
@@ -151,12 +134,11 @@ bot.on("message", async (msg) => {
                 throw new Error(response.data.error || "Failed to send code");
             }
 
-            const codePrompt = await bot.sendMessage(
+            await bot.sendMessage(
                 chatId, 
                 "📨 Verification code sent! Please enter the code you received.", 
                 { parse_mode: "MarkdownV2" }
             );
-            deleteAfter(chatId, codePrompt.message_id);
 
         } else if (state.step === "awaiting_code") {
             // Validate code format
@@ -164,12 +146,11 @@ bot.on("message", async (msg) => {
                 throw new Error("Invalid code format. Please enter 5 or 6 digits.");
             }
 
-            const waitMsg = await bot.sendMessage(
+            await bot.sendMessage(
                 chatId, 
                 "⌛ Creating session...", 
                 { parse_mode: "MarkdownV2" }
             );
-            deleteAfter(chatId, waitMsg.message_id);
 
             // Call session service
             const response = await axios.post(`${SESSION_SERVICE_URL}/create_session`, {
@@ -183,7 +164,7 @@ bot.on("message", async (msg) => {
                 throw new Error(response.data.error || "Session creation failed");
             }
 
-            const result = await bot.sendMessage(
+            await bot.sendMessage(
                 chatId,
                 "*✅ Session created successfully\\!*\\n\\n" +
                 "*Session string:*\\n" +
@@ -191,26 +172,24 @@ bot.on("message", async (msg) => {
                 "*⚠️ Warning:* Do \\*not\\* share this with anyone\\!",
                 { parse_mode: "MarkdownV2" }
             );
-            deleteAfter(chatId, result.message_id);
 
             await clearUserState(chatId);
         }
     } catch (error) {
         console.error('Message handling error:', error);
-        
+
         const errorMessage = `*❌ Error:* ${escapeMarkdownV2(error.message)}\\n\\nUse /start to try again.`;
-        
+
         try {
-            const errMsg = await bot.sendMessage(
+            await bot.sendMessage(
                 chatId,
                 errorMessage,
                 { parse_mode: "MarkdownV2" }
             );
-            deleteAfter(chatId, errMsg.message_id);
         } catch (sendError) {
             console.error('Failed to send error message:', sendError);
         }
-        
+
         await clearUserState(chatId);
     }
 });
